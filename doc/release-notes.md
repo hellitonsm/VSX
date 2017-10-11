@@ -1,32 +1,18 @@
-(note: this is a temporary file, to be added-to by anybody, and moved to release-notes at release time)
+Vsync Core version 2.2.1 is now available from:
 
-PIVX Core version *version* is now available from:
+  <https://github.com/vsync-project/vsync/releases>
 
-  <https://github.com/pivx-project/pivx/releases>
-
-This is a new major version release, including various bug fixes and
+This is a new minor version release, including various bug fixes and
 performance improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at github:
 
-  <https://github.com/pivx-project/pivx/issues>
-
-Mandatory Update
-==============
-
-PIVX Core v3.0.0 is a mandatory update for all users. This release contains new consensus rules and improvements that are not backwards compatible with older versions. Users will have a grace period of one week to update their clients before enforcement of this update is enabled.
-
-Users updating from a previous version after the 16th of October will require a full resync of their local blockchain from either the P2P network or by way of the bootstrap.
-
-How to Upgrade
-==============
-
-If you are running an older version, shut it down. Wait until it has completely shut down (which might take a few minutes for older versions), then run the installer (on Windows) or just copy over /Applications/PIVX-Qt (on Mac) or pivxd/pivx-qt (on Linux).
+  <https://github.com/vsync-project/vsync/issues>
 
 Compatibility
 ==============
 
-PIVX Core is extensively tested on multiple operating systems using
+Vsync Core is extensively tested on multiple operating systems using
 the Linux kernel, macOS 10.8+, and Windows Vista and later.
 
 Microsoft ended support for Windows XP on [April 8th, 2014](https://www.microsoft.com/en-us/WindowsForBusiness/end-of-xp-support),
@@ -34,29 +20,54 @@ No attempt is made to prevent installing or running the software on Windows XP, 
 can still do so at your own risk but be aware that there are known instabilities and issues.
 Please do not report issues about Windows XP to the issue tracker.
 
-PIVX Core should also work on most other Unix-like systems but is not
+Vsync Core should also work on most other Unix-like systems but is not
 frequently tested on them.
 
 Notable Changes
 ===============
 
-Zerocoin (zPIV) Protocol
+Block Data Corruption
 ---------------------
 
-At long last, the zPIV release is here and the zerocoin protocol has been fully implemented! This allows users to send transactions with 100% fungible coins and absolutely zero history or link-ability to their previous owners.
+Additional startup procedures have been added to fix corrupted blockchain databases.
+The majority of users that are experiencing #106 (ConnectBlock() assertion on startup)
+that have tested the new wallet have reported that their corrupt blockchain has
+successfully been repaired. The new code will automatically detect and repair the
+blockchain if it is able to.
 
-Full and comprehensive details about the process and the use will be posted here during the days between Oct 6 and Oct 13.
+If users still experience corruptions with the new wallet and it is not fixed
+with the new startup procedures, it is suggested that they try using the
+`-forcestart` startup flag which will bypass the new procedures altogether, and
+in rare cases allow the wallet to run. If the database is not fixed by either
+the automatic procedures or the `-forcestart` flag, the user should resync the
+blockchain.
 
-Tor Service Integration Improvements
----------------------
+Additional progress has been made to prevent the wallet crashes that are causing
+the corrupted databases, for example removing the Trading Window (explained below)
+and fixing several other minor memory leaks that were inherited from the version
+of Bitcoin that Vsync was forked from.
 
-Integrating with Tor is now easier than ever! Starting with Tor version 0.2.7.1 it is possible, through Tor's control socket API, to create and destroy 'ephemeral' hidden services programmatically. PIVX Core has been updated to make use of this.
+RPC Changes
+-----------
 
-This means that if Tor is running (and proper authorization is available), PIVX Core automatically creates a hidden service to listen on, without manual configuration. PIVX Core will also use Tor automatically to connect to other .onion nodes if the control socket can be successfully opened. This will positively affect the number of available .onion nodes and their usage.
+- Exporting or dumping an addresses' private key while the wallet is unlocked for
+  anonymization and Staking only is no longer possible.
 
-This new feature is enabled by default if PIVX Core is listening, and a connection to Tor can be made. It can be configured with the `-listenonion`, `-torcontrol` and `-torpassword` settings. To show verbose debugging information, pass `-debug=tor`.
+- A new command (`getstakingstatus`) has been added that returns the internal conditions
+  for staking to be activated and their status.
 
-*version* Change log
+- KeePass integration has been removed for the time being due to various inefficiencies
+  with it's code.
+
+Trading Window Removed
+----------------------
+
+The Bittrex trading window in the GUI wallet was problematic with it's memory
+handling, often leaking, and was overall an inefficient use of resources in it's
+current implementation. A revised multi-exchange trading window may be implemented
+at a later date.
+
+2.2.1 Change log
 =================
 
 Detailed release notes follow. This overview includes changes that affect
@@ -64,27 +75,47 @@ behavior, not code moves, refactors and string updates. For convenience in locat
 the code changes and accompanying discussion, both the pull request and
 git merge commit are mentioned.
 
-### Broad Features
-- #264 `15e84e5` zPIV is here! (Fuzzbawls Mrs-X Presstab Spock PIVX)
+### RPC and other APIs
+- #130 `ccb1526` [RPC] Add `getstakingstatus` method
+- #138 `4319af3` [RPC] Require password when using UnlockAnonymizeOnly
+- #142 `6b5cf7f` [RPC] Remove Keepass code due to Valgrind warnings
+
+### Block and Transaction Handling
+- #146 `bce67cb` [Wallet] Look at last CoinsView block for corruption fix process
+- #154 `1b3c0d7` [Consensus] Don't pass the genesis block through CheckWork
 
 ### P2P Protocol and Network Code
-- #242 `0ecd77f` [P2P] Improve TOR service connectivity (Fuzzbawls)
+- #168 `ac912d9` [Wallet] Update checkpoints with v2.2 chain
+- #162 `0c0d080` Remove legacy Dash code IsReferenceNode
+- #163 `96b8b00` [P2P] Change alert key to effectively disable it
 
 ### GUI
-- #251 `79af8d2` [Qt] Adjust masternode count in information UI (Mrs-X)
+- #131 `238977b` [Qt] Adds base CSS styles for various elements
+- #134 `f7cabbe` [Qt] Edit masternode.conf in Qt-wallet
+- #135 `f8f1904` [Qt] Show path to wallet.dat in wallet-repair tab
+- #136 `53705f1` [Qt] Fix false flags for MultiSend notification when sending transactions
+- #137 `ad08051` [Qt] Fix Overview Page Balances when receiving
+- #141 `17a9e0f` [Qt] Squashed trading removal code
+- #151 `0409b12` [Qt] Avoid OpenSSL certstore-related memory leak
+- #165 `0dad320` [Qt] More place for long locales
 
 ### Miscellaneous
-- #258 `c950765` [Depends] Update Depends with newer versions (Fuzzbawls)
+- #133 `fceb421` [Docs] Add GitHub Issue template and Contributor guidelines
+- #144 `e4e68bc` [Wallet] Reduce usage of atoi to comply with CWE-190
+- #152 `6a1de07` [Trivial] Use LogPrint for repetitive budget logs
+- #157 `41fdeaa` [Budget] Add log for removed budget proposals
+- #166 `d37b4aa` [Utils] Add ExecStop= to example systemd service
+- #167 `a6becee` [Utils] makeseeds script update
 
 Credits
 =======
 
 Thanks to everyone who directly contributed to this release:
+
+- Aaron Miller
 - Fuzzbawls
-- Jon Spock
 - Mrs-X
-- PIVX
-- amirabrams
+- Spock
 - presstab
 
-As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/pivx-project-translations/).
+As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/vsync-project-translations/).

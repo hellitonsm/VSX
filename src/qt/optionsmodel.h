@@ -43,9 +43,8 @@ public:
         ThreadsScriptVerif,  // int
         DatabaseCache,       // int
         SpendZeroConfChange, // bool
-        ZeromintPercentage,  // int
-        ZeromintPrefDenom,   // int
-        AnonymizePivxAmount, //int
+        ObfuscationRounds,   // int
+        AnonymizeVsyncAmount, //int
         ShowMasternodesTab,  // bool
         Listen,              // bool
         OptionIDRowCount,
@@ -90,9 +89,8 @@ private:
 
 signals:
     void displayUnitChanged(int unit);
-    void zeromintPercentageChanged(int);
-    void preferredDenomChanged(int);
-    void anonymizePivxAmountChanged(int);
+    void obfuscationRoundsChanged(int);
+    void anonymizeVsyncAmountChanged(int);
     void coinControlFeaturesChanged(bool);
 };
 

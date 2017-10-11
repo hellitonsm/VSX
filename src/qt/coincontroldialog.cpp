@@ -1,8 +1,10 @@
 // Copyright (c) 2011-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2017 The PIVX developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2017 The Vsync developers
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 
 #include "coincontroldialog.h"
 #include "ui_coincontroldialog.h"
@@ -133,6 +135,7 @@ CoinControlDialog::CoinControlDialog(QWidget* parent) : QDialog(parent),
     ui->treeWidget->setColumnWidth(COLUMN_AMOUNT, 100);
     ui->treeWidget->setColumnWidth(COLUMN_LABEL, 170);
     ui->treeWidget->setColumnWidth(COLUMN_ADDRESS, 190);
+    ui->treeWidget->setColumnWidth(COLUMN_OBFUSCATION_ROUNDS, 88);
     ui->treeWidget->setColumnWidth(COLUMN_DATE, 80);
     ui->treeWidget->setColumnWidth(COLUMN_CONFIRMATIONS, 100);
     ui->treeWidget->setColumnWidth(COLUMN_PRIORITY, 100);
@@ -427,8 +430,17 @@ void CoinControlDialog::viewItemChanged(QTreeWidgetItem* item, int column)
             coinControl->UnSelect(outpt);
         else if (item->isDisabled()) // locked (this happens if "check all" through parent node)
             item->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
-        else
+        else {
             coinControl->Select(outpt);
+            CTxIn vin(outpt);
+            int rounds = pwalletMain->GetInputObfuscationRounds(vin);
+            if (coinControl->useObfuScation && rounds < nObfuscationRounds) {
+                QMessageBox::warning(this, windowTitle(),
+                    tr("Non-anonymized input selected. <b>Obfuscation will be disabled.</b><br><br>If you still want to use Obfuscation, please deselect all non-nonymized inputs first and then check Obfuscation checkbox again."),
+                    QMessageBox::Ok, QMessageBox::Ok);
+                coinControl->useObfuScation = false;
+            }
+        }
 
         // selection changed -> update labels
         if (ui->treeWidget->isEnabled()) // do not update on every click for (un)select all
@@ -586,6 +598,11 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
         if (nPayAmount > 0) {
             nChange = nAmount - nPayFee - nPayAmount;
 
+            // DS Fee = overpay
+            if (coinControl->useObfuScation && nChange > 0) {
+                nPayFee += nChange;
+                nChange = 0;
+            }
             // Never create dust outputs; if we would, just add the dust to the fee.
             if (nChange > 0 && nChange < CENT) {
                 CTxOut txout(nChange, (CScript)vector<unsigned char>(24, 0));
@@ -606,7 +623,7 @@ void CoinControlDialog::updateLabels(WalletModel* model, QDialog* dialog)
     }
 
     // actually update labels
-    int nDisplayUnit = BitcoinUnits::PIV;
+    int nDisplayUnit = BitcoinUnits::VSX;
     if (model && model->getOptionsModel())
         nDisplayUnit = model->getOptionsModel()->getDisplayUnit();
 
@@ -750,7 +767,7 @@ void CoinControlDialog::updateView()
             if (ExtractDestination(out.tx->vout[out.i].scriptPubKey, outputAddress)) {
                 sAddress = QString::fromStdString(CBitcoinAddress(outputAddress).ToString());
 
-                // if listMode or change => show PIVX address. In tree mode, address is not shown again for direct wallet address outputs
+                // if listMode or change => show Vsync address. In tree mode, address is not shown again for direct wallet address outputs
                 if (!treeMode || (!(sAddress == sWalletAddress)))
                     itemOutput->setText(COLUMN_ADDRESS, sAddress);
 
@@ -784,6 +801,17 @@ void CoinControlDialog::updateView()
             itemOutput->setText(COLUMN_DATE, GUIUtil::dateTimeStr(out.tx->GetTxTime()));
             itemOutput->setToolTip(COLUMN_DATE, GUIUtil::dateTimeStr(out.tx->GetTxTime()));
             itemOutput->setText(COLUMN_DATE_INT64, strPad(QString::number(out.tx->GetTxTime()), 20, " "));
+
+
+            // ds+ rounds
+            CTxIn vin = CTxIn(out.tx->GetHash(), out.i);
+            int rounds = pwalletMain->GetInputObfuscationRounds(vin);
+
+            if (rounds >= 0)
+                itemOutput->setText(COLUMN_OBFUSCATION_ROUNDS, strPad(QString::number(rounds), 11, " "));
+            else
+                itemOutput->setText(COLUMN_OBFUSCATION_ROUNDS, strPad(QString(tr("n/a")), 11, " "));
+
 
             // confirmations
             itemOutput->setText(COLUMN_CONFIRMATIONS, strPad(QString::number(out.nDepth), 8, " "));
