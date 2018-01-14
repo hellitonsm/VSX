@@ -1,4 +1,4 @@
-<h2><strong>Vsync Staging Repository (Version 1.0.0.1) New Roadmap - Wwbsite coming soon</strong></h2>
+<h2><strong>Vsync Staging Repository (Version 1.0.0.1) New Roadmap - Website coming soon</strong></h2>
 <p>More information at vsync.pw Visit our ANN thread at https://bitcointalk.org/index.php?topic=2133048</p>
 <h3><strong>Coin specs:</strong></h3>
 <p><strong><span style="color: #800080;"><em>Algo:</em></span></strong></p>
