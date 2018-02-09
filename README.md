@@ -1,4 +1,4 @@
-<h2><strong>Vsync Staging Repository (Version 1.0.0.1)</strong></h2>
+<h2><strong>Vsync Staging Repository (Version 2.0.0.0)</strong></h2>
 <p>Vsync Official Twitter: https://twitter.com/VsyncCrypto</p>
 <p>Vsync Official Website: https://vsync.pw</p>
 <p>Vsync Roadmap 2018-2019: https://www.youtube.com/watch?v=owQ1qMsHhbQ</p>
