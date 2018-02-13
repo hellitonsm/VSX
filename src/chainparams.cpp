@@ -123,7 +123,7 @@ public:
         assert(hashGenesisBlock == uint256("0x00000a47e5f67b18cc1bd58c9e50b5295370cc36df1245a2cd07bf6bb2486e72"));
         assert(genesis.hashMerkleRoot == uint256("0x55e07427d0ca8579ca7296908f464699df9a54782d28bda012656c9d33a3a3c4"));
 		
-        vSeeds.push_back(CDNSSeedData("vsyncseed.dyndns.org", "vsyncseed.dyndns.org"));
+        vSeeds.push_back(CDNSSeedData("vsyncseed.vsync.pw", "vsyncseed.vsync.pw"));
 		vSeeds.push_back(CDNSSeedData("node.vsync.pw", "node.vsync.pw"));
 		vSeeds.push_back(CDNSSeedData("node1.vsync.pw", "node1.vsync.pw"));
 		vSeeds.push_back(CDNSSeedData("node2.vsync.pw", "node2.vsync.pw"));
